@@ -14,9 +14,15 @@ client.on("connect", function () {
 
 client.on("message", function (topic, message) {
   const data = message.toString();
-  console.log("Received message:", data);
-  if (data !== "-1") {
-  } else {
+  try {
+    const jsonData = JSON.parse(data); // Parse the received JSON string
+    console.log("Received JSON data:", jsonData);
+
+  } catch (error) {
+    console.error("Error parsing JSON:", error);
+  }
+
+  if (data === "-1") {
     console.log("Received -1. Closing connection.");
     client.end();
   }
