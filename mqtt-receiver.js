@@ -9,127 +9,70 @@ document.addEventListener("DOMContentLoaded", function() {
 
   const client = mqtt.connect(broker, options);
 
-  const maxDataPoints = 10;
-
-  const ctxTemp = document.getElementById('tempChart').getContext('2d');
-  const ctxPulse = document.getElementById('pulseChart').getContext('2d');
-  const ctxSpo2 = document.getElementById('spo2Chart').getContext('2d');
-  const ctxGlucose = document.getElementById('glucoseChart').getContext('2d');
-
-  const option = {
-    responsive: true,
-    scales: {
-      xAxis: [{
-        type: 'time',
-        time: {
-          unit: 'second'
-        }
-      }],
-      yAxis: [{
-        ticks: {
-          beginAtZero: true
-        }
-      }]
-    }
-  }
-
-  const tempChart = new Chart(ctxTemp, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Temperature',
-        data: [],
-        borderColor: 'red',
-        borderWidth: 1,
-        fill: false
-      }]
-    },
-    options: option
-  });
-
-  const pulseChart = new Chart(ctxPulse, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Pulse',
-        data: [],
-        borderColor: 'blue',
-        borderWidth: 1,
-        fill: false
-      }]
-    },
-    options: option
-  });
-
-  const spo2Chart = new Chart(ctxSpo2, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Spo2',
-        data: [],
-        borderColor: 'green',
-        borderWidth: 1,
-        fill: false
-      }]
-    },
-    options: option
-  });
-
-  const glucoseChart = new Chart(ctxGlucose, {
-    type: 'line',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Glucose Level',
-        data: [],
-        borderColor: 'orange',
-        borderWidth: 1,
-        fill: false
-      }]
-    },
-    options: option
-  });
-
+  const MAX_DATA_POINTS = 10; // Maximum number of data points to display
+  const tempData = [['x'], ['Temperature']];
+  const pulseData = [['x'], ['Pulse']];
 
   client.on("connect", function () {
     console.log("Connected to MQTT broker");
     client.subscribe(topic);
   });
 
-  client.on("message", function (topic, message) {
-    const data = JSON.parse(message.toString());
-    console.log("Received JSON data:", data);
-    
-    const timestamp = new Date(data.timestamp);
-    const timeString = `${timestamp.getHours()}:${timestamp.getMinutes()}:${timestamp.getSeconds()}`;
-
-    const temp = data.temp;
-    const pulse = data.pulse;
-    const spo2 = data.spo2;
-    const glucoseLevel = data.glucoseLevel;
-    
-    addData(tempChart, timeString, temp);
-    addData(pulseChart, timeString, pulse);
-    addData(spo2Chart, timeString, spo2);
-    addData(glucoseChart, timeString, glucoseLevel);
+  function generateChart(bindTo, label){
+    return c3.generate({
+      bindto: bindTo,
+      data: {
+          x: 'x',
+          columns: [
+              ['x'],
+              [label]
+          ],
+          colors: {
+              Temperature: 'red',
+              Pulse: 'blue'
+          }
+      },
+      axis: {
+          x: {
+              type: 'timeseries',
+              tick: {
+                  format: '%H:%M:%S'
+              }
+          },
+          y: {
+              label: {
+                  text: label,
+                  position: 'outer-middle'
+              }
+          }
+      }
   });
-
-  client.on("error", function (error) {
-    console.error("Error:", error);
-  });
-
-  function addData(chart, label, data) {
-    chart.data.labels.push(label);
-    chart.data.datasets[0].data.push(data);
-
-    if (chart.data.labels.length > maxDataPoints) {
-      chart.data.labels.shift();
-      chart.data.datasets[0].data.shift();
-    }
-
-    chart.update();
   }
+
+  const tempChart = generateChart('#tempChart', 'Temperature')
+  const pulseChart = generateChart('#pulseChart', 'Pulse')
+
+  function addData(chart, time, value, dataStore) {
+    if (dataStore[0].length >= MAX_DATA_POINTS + 1) {
+      dataStore[0].splice(1, 1);
+      dataStore[1].splice(1, 1);
+    }
+    dataStore[0].push(time);
+    dataStore[1].push(value);
+    chart.load({
+        columns: dataStore,
+        length: 0,
+        duration: 1000
+    });
+}
+
+  client.on("message", function(topic, message) {
+      const data = JSON.parse(message.toString());
+      console.log("Received JSON data:", data);
+      const timestamp = new Date(data.timestamp);
+      const temp = data.temp;
+      const pulse = data.pulse;
+      addData(tempChart, timestamp, temp, tempData);
+      addData(pulseChart,timestamp, pulse, pulseData);
+  })
 });

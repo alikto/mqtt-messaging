@@ -4,8 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Real-time Line Chart</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.2.7/mqtt.min.js"></script> <!-- Include MQTT.js library -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mqtt/4.2.7/mqtt.min.js"></script>
   <script src="mqtt-receiver.js"></script>
 
   <style>
@@ -26,18 +26,23 @@
 <body>
   <div class="chart-container">
     <div class="chart-item">
-      <canvas id="tempChart" class="chart"></canvas>
+      <div id="tempChart" class="chart"></div>
     </div>
     <div class="chart-item">
-      <canvas id="pulseChart" class="chart"></canvas>
+      <div id="pulseChart" class="chart"></div>
     </div>
     <div class="chart-item">
-      <canvas id="spo2Chart" class="chart"></canvas>
+      <div id="spo2Chart" class="chart"></div>
     </div>
     <div class="chart-item">
-      <canvas id="glucoseChart" class="chart"></canvas>
+      <div id="glucoseLevelChart" class="chart"></div>
     </div>
   </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/c3/0.4.18/c3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.1.0/mqttws31.min.js"></script>
+
 
 </body>
 </html>
