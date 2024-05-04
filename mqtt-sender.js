@@ -1,10 +1,13 @@
-const mqtt = require("mqtt");
+const mqtt = require('mqtt')
+const broker = "wss://1487db52e3564dcf9625c136ac6f864f.s1.eu.hivemq.cloud:8884/mqtt";
+const options = {
+  username: "aleyna_tuzcu",
+  password: "Aleyna_mqtt1"
+};
 
-const broker = "mqtt://localhost";
+const topic = "data";
 
-const topic = "pulse_data";
-
-const client = mqtt.connect(broker);
+const client = mqtt.connect(broker, options);
 
 function getRandomValue(min, max) {
   return Math.random() * (max - min) + min;
