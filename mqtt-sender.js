@@ -20,7 +20,7 @@ client.on("connect", function () {
     const timestamp = new Date().toISOString(); // Get current timestamp
     const patientData = {
       timestamp: timestamp,
-      temp: getRandomValue(36.0, 38.0),
+      temperature: getRandomValue(36.0, 38.0),
       pulse: getRandomValue(60, 100),
       bloodPressure: {
         systolic: getRandomValue(100, 130),
